@@ -1,0 +1,48 @@
+# ============================================================
+#  Spam Message Collector - Python Dependencies
+#  Python 3.14+ ile uyumlu, esnek versiyon kısıtlamaları.
+#  (Alt sınır belirlendi, üst sınır pip'e bırakıldı)
+# ============================================================
+
+# --- Veri Bilimi ve Makine Öğrenmesi (Core) ---
+numpy>=2.0
+pandas>=2.2
+scikit-learn>=1.5
+scipy>=1.13
+joblib>=1.4             # Model serileştirme (.joblib formatı)
+
+# --- Doğal Dil İşleme (NLP) ---
+nltk>=3.8
+kagglehub>=0.2          # Kaggle veri indirme (zaten kullanılıyor)
+
+# --- Görselleştirme (EDA için) ---
+matplotlib>=3.8
+seaborn>=0.13
+wordcloud>=1.9          # Kelime bulutu görselleştirme
+
+# --- Jupyter Notebook (EDA ve Deneyler) ---
+jupyter>=1.0
+notebook>=7.0
+ipykernel>=6.29
+ipywidgets>=8.1
+
+# --- Backend: FastAPI ve Bağımlılıkları ---
+fastapi>=0.111
+uvicorn[standard]>=0.29  # ASGI sunucusu (WebSocket desteği dahil)
+pydantic>=2.7            # Veri validasyonu
+pydantic-settings>=2.2   # .env dosyasından config okuma
+python-multipart>=0.0.9  # Form veri desteği
+
+# --- HTTP İstemcisi (test ve entegrasyon için) ---
+httpx>=0.27              # FastAPI TestClient bağımlılığı
+requests>=2.31
+
+# --- Loglama ve Yardımcılar ---
+loguru>=0.7              # Gelişmiş loglama
+python-dotenv>=1.0       # .env dosyası yönetimi
+
+# --- Geliştirme ve Test Araçları ---
+pytest>=8.2
+pytest-asyncio>=0.23
+black>=24.4              # Kod formatlama
+ruff>=0.4                # Hızlı linter
