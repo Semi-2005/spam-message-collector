@@ -1,0 +1,43 @@
+# ============================================================
+#  Spam Message Collector — .gitignore
+# ============================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+
+# --- Virtual Environment ---
+.venv/
+venv/
+env/
+
+# --- Veri Dosyaları (pipeline ile yeniden üretilebilir) ---
+data/raw/*.csv
+data/processed/*.csv
+
+# --- Eğitilmiş Modeller (Gün 3'te eklenecek) ---
+models/*.joblib
+models/*.pkl
+
+# --- Jupyter Notebook ---
+.ipynb_checkpoints/
+
+# --- IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Ortam Değişkenleri ---
+.env
+.env.*
