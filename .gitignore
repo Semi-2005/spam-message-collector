@@ -42,3 +42,6 @@ Thumbs.db
 # --- Ortam Değişkenleri ---
 .env
 .env.*
+
+# --- Gelistirme Plani ---
+implementation_plan.md
