@@ -21,9 +21,10 @@ env/
 data/raw/*.csv
 data/processed/*.csv
 
-# --- Eğitilmiş Modeller (Gün 3'te eklenecek) ---
+# --- Eğitilmiş Modeller ---
 models/*.joblib
 models/*.pkl
+models/artifacts/
 
 # --- Jupyter Notebook ---
 .ipynb_checkpoints/
