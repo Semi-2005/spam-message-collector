@@ -60,9 +60,23 @@ spam-message-collector/
 ├── data/
 │   ├── raw/                 # Original, immutable datasets
 │   └── processed/           # Cleaned data ready for model training
-├── backend/                 # FastAPI application and inference logic
-├── frontend/                # React.js client application
-├── models/                  # Serialized machine learning models (.pkl / .joblib)
+├── preprocessing/
+│   ├── __init__.py
+│   └── text_cleaner.py      # NLP preprocessing pipeline (TextCleaner)
+├── models/
+│   ├── __init__.py
+│   ├── train_model.py       # Model training & evaluation pipeline
+│   └── artifacts/           # Serialized models (.joblib) & metadata
+├── backend/
+│   ├── __init__.py
+│   ├── config.py            # Pydantic-settings configuration
+│   ├── schemas.py           # Request/Response validation models
+│   ├── main.py              # FastAPI app entrypoint
+│   ├── routers/
+│   │   └── classify.py      # /api/v1/classify endpoints
+│   └── services/
+│       └── classifier.py    # Singleton model loader & inference
+├── frontend/                # React.js client application (Gün 5)
 ├── notebooks/               # Jupyter notebooks for EDA and experimentation
 ├── download_dataset.py      # Script to fetch raw data
 ├── requirements.txt         # Python dependencies
@@ -113,11 +127,10 @@ Follow these steps to set up the project locally.
 
 ### Running the API
 
-Once your environment is set up and the model is trained/serialized, you can start the backend inference server:
+Once your environment is set up and the model is trained/serialized, you can start the backend inference server from the **project root**:
 
 ```bash
-cd backend
-uvicorn main:app --reload
+uvicorn backend.main:app --reload --port 8000
 ```
 
 The API will be available at `http://127.0.0.1:8000`. You can access the interactive Swagger documentation at `http://127.0.0.1:8000/docs`.
@@ -135,9 +148,11 @@ curl -X POST "http://127.0.0.1:8000/api/v1/classify" \
 **Expected Response:**
 ```json
 {
-  "spam_probability": 0.98,
+  "text": "Congratulations! You have won a $1,000 Walmart gift card. Click here to claim your prize.",
+  "label": "spam",
   "is_spam": true,
-  "label": "spam"
+  "spam_probability": 0.671,
+  "confidence_level": "Orta"
 }
 ```
 
