@@ -119,25 +119,39 @@ Follow these steps to set up the project locally.
     python download_dataset.py
     ```
 
-*(Note: Frontend setup instructions will be located in the `frontend/` directory.)*
-
 ---
 
 ## 💻 Usage
 
-### Running the API
+### Running the Full Application
 
-Once your environment is set up and the model is trained/serialized, you can start the backend inference server from the **project root**:
+The application requires **two terminals** — one for the backend API and one for the frontend React app.
+
+**Terminal 1 — Backend (FastAPI):**
 
 ```bash
+cd /path/to/spam-message-collector
+source .venv/bin/activate
 uvicorn backend.main:app --reload --port 8000
 ```
 
-The API will be available at `http://127.0.0.1:8000`. You can access the interactive Swagger documentation at `http://127.0.0.1:8000/docs`.
+> The API will be available at `http://127.0.0.1:8000`. Swagger docs: `http://127.0.0.1:8000/docs`
+
+**Terminal 2 — Frontend (React):**
+
+```bash
+cd /path/to/spam-message-collector/frontend
+npm install   # sadece ilk seferde
+npm run dev
+```
+
+> Frontend `http://localhost:5173` adresinde açılacaktır.
+
+Tarayıcıda `http://localhost:5173` adresini açarak uygulamayı kullanabilirsiniz.
 
 ### API Inference Example
 
-You can test the classification endpoint using `curl`:
+You can also test the classification endpoint directly using `curl`:
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/v1/classify" \
