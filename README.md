@@ -7,8 +7,9 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python Version">
   <img src="https://img.shields.io/badge/FastAPI-0.109+-009688.svg?logo=fastapi" alt="FastAPI">
-  <img src="https://img.shields.io/badge/React-18.2+-61DAFB.svg?logo=react" alt="React">
+  <img src="https://img.shields.io/badge/React-19.2+-61DAFB.svg?logo=react" alt="React">
   <img src="https://img.shields.io/badge/Scikit--Learn-1.4+-F7931E.svg?logo=scikit-learn" alt="Scikit-Learn">
+  <img src="https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF.svg?logo=github-actions" alt="CI/CD">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
 </p>
 
@@ -26,6 +27,12 @@
 - [Usage](#-usage)
   - [Running the Full Application](#running-the-full-application)
   - [API Inference Example](#api-inference-example)
+- [Testing & CI/CD](#-testing--cicd-pipeline)
+  - [Running Local Tests](#running-local-tests)
+  - [Code Quality & Linting](#code-quality--linting)
+  - [GitHub Actions Pipeline](#github-actions-pipeline)
+- [Roadmap](#-roadmap)
+- [License](#-license)
 
 ---
 
@@ -47,7 +54,8 @@ The project lifecycle is built on a robust, modular architecture:
 
 *   **Core / Data Science:** Python, NLTK, Scikit-Learn, Pandas, NumPy
 *   **Backend:** FastAPI, Uvicorn, Pydantic
-*   **Frontend:** React.js, Axios
+*   **Frontend:** React.js, Vite, Axios, Oxlint
+*   **CI/CD & DevOps:** GitHub Actions, Pytest, Ruff
 
 ---
 
@@ -55,31 +63,67 @@ The project lifecycle is built on a robust, modular architecture:
 
 ```text
 spam-message-collector/
-├── data/
-│   ├── raw/                 # Original, immutable datasets
-│   └── processed/           # Cleaned data ready for model training
-├── preprocessing/
-│   ├── __init__.py
-│   └── text_cleaner.py      # NLP preprocessing pipeline (TextCleaner)
-├── models/
-│   ├── __init__.py
-│   ├── train_model.py       # Model training & evaluation pipeline
-│   └── artifacts/           # Serialized models (.joblib) & metadata
-├── backend/
-│   ├── __init__.py
-│   ├── config.py            # Pydantic-settings configuration
-│   ├── schemas.py           # Request/Response validation models
-│   ├── main.py              # FastAPI app entrypoint
-│   ├── routers/
-│   │   └── classify.py      # /api/v1/classify endpoints
-│   └── services/
-│       └── classifier.py    # Singleton model loader & inference
-├── frontend/                # React.js client application (Gün 5)
-├── notebooks/               # Jupyter notebooks for EDA and experimentation
-├── download_dataset.py      # Script to fetch raw data
+├── .github/
+│   └── workflows/
+│       ├── ci.yml           # Main CI: Python Matrix (3.10-3.12), Pytest, Ruff, Oxlint, Vite Build
+│       └── security.yml     # Security and dependency audit workflow
+├── backend/                 # FastAPI REST API
+├── data/                    # Datasets (raw & processed)
+├── frontend/                # React + Vite Client
+├── models/                  # ML training scripts and serialized artifacts
+├── preprocessing/           # NLP TextCleaner pipeline
+├── tests/                   # Pytest unit & API integration test suite
+├── pyproject.toml           # Pytest and Ruff configuration
 ├── requirements.txt         # Python dependencies
 └── README.md
 ```
+
+---
+
+## 🧪 Testing & CI/CD Pipeline
+
+The project features a Senior-grade automated CI/CD pipeline powered by **GitHub Actions** with fail-fast execution, dependency caching, and full coverage.
+
+### Running Local Tests
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run full Pytest suite
+pytest -v
+```
+
+### Code Quality & Linting
+
+```bash
+# Python linting and formatting check
+ruff check .
+ruff format --check .
+
+# Frontend static analysis and production build check
+cd frontend
+npm run lint
+npm run build
+```
+
+### GitHub Actions Pipeline
+
+On every `push` and `pull_request` to `main`, GitHub Actions automatically:
+1. 🐍 **Python Quality Gate:** Runs `ruff check` and `ruff format` to enforce clean code.
+2. 🧪 **Matrix Testing:** Executes 20+ unit and API integration tests across Python `3.10`, `3.11`, and `3.12`.
+3. ⚛️ **Frontend Linter:** Performs static analysis with `oxlint`.
+4. 📦 **Production Build:** Validates that the React/Vite SPA builds successfully without errors.
+5. ⚡ **Smart Caching:** Utilizes `pip` and `npm` cache to maintain pipeline speeds under 30 seconds.
+
+---
+
+## 🗺 Roadmap
+
+- [ ] Implement advanced Deep Learning models (e.g., LSTM, BERT).
+- [x] Add extensive unit and integration tests (20+ automated tests).
+- [ ] **Dockerization:** Containerize the React frontend and FastAPI backend using Docker and `docker-compose` for seamless, independent scaling and deployment.
+- [x] Implement CI/CD pipelines with GitHub Actions.
 
 ---
 
