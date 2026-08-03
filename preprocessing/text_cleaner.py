@@ -39,9 +39,7 @@ from __future__ import annotations
 import logging
 import re
 import ssl
-import string
 from pathlib import Path
-from typing import Optional
 
 import nltk
 import pandas as pd
@@ -131,7 +129,7 @@ class TextCleaner:
         self,
         remove_numbers: bool = True,
         min_token_length: int = 2,
-        custom_stopwords: Optional[set[str]] = None,
+        custom_stopwords: set[str] | None = None,
     ) -> None:
         # Lemmatizer — NLTK WordNet tabanlı, fiil+isim formlarına indirgeme
         self._lemmatizer = WordNetLemmatizer()
@@ -145,8 +143,7 @@ class TextCleaner:
         self.min_token_length = min_token_length
 
         logger.info(
-            "TextCleaner başlatıldı — remove_numbers=%s, min_token_length=%d, "
-            "stopwords_count=%d",
+            "TextCleaner başlatıldı — remove_numbers=%s, min_token_length=%d, stopwords_count=%d",
             self.remove_numbers,
             self.min_token_length,
             len(self._stop_words),
@@ -409,17 +406,13 @@ class TextCleaner:
         result[output_text_col] = df[text_column].apply(self.clean_text)
 
         # İstatistiksel sütunlar ekle (EDA ve feature engineering için faydalı)
-        result["word_count"] = result[output_text_col].apply(
-            lambda x: len(x.split()) if x else 0
-        )
+        result["word_count"] = result[output_text_col].apply(lambda x: len(x.split()) if x else 0)
         result["char_count"] = result[output_text_col].apply(len)
 
         # Boş temizlenmiş metinleri düşür (çok nadir)
         empty_count = (result[output_text_col] == "").sum()
         if empty_count > 0:
-            logger.warning(
-                "%d satır temizleme sonrası boş kaldı ve düşürüldü.", empty_count
-            )
+            logger.warning("%d satır temizleme sonrası boş kaldı ve düşürüldü.", empty_count)
             result = result[result[output_text_col] != ""].reset_index(drop=True)
 
         logger.info(
@@ -482,9 +475,13 @@ def run_pipeline(
     # Veri seti hakkında bilgi
     spam_count = (df_raw["v1"] == "spam").sum()
     ham_count = (df_raw["v1"] == "ham").sum()
-    logger.info("Sınıf dağılımı — Ham: %d (%.1f%%), Spam: %d (%.1f%%)",
-                ham_count, ham_count / len(df_raw) * 100,
-                spam_count, spam_count / len(df_raw) * 100)
+    logger.info(
+        "Sınıf dağılımı — Ham: %d (%.1f%%), Spam: %d (%.1f%%)",
+        ham_count,
+        ham_count / len(df_raw) * 100,
+        spam_count,
+        spam_count / len(df_raw) * 100,
+    )
 
     # 2. TextCleaner'ı başlat ve pipeline'ı çalıştır
     cleaner = TextCleaner(remove_numbers=True, min_token_length=2)
@@ -508,8 +505,9 @@ def run_pipeline(
     logger.info("Sınıf dağılımı (temiz):")
     for label, count in df_clean["label"].value_counts().items():
         label_name = "Ham" if label == 0 else "Spam"
-        logger.info("  %s (=%d): %d (%.1f%%)",
-                    label_name, label, count, count / len(df_clean) * 100)
+        logger.info(
+            "  %s (=%d): %d (%.1f%%)", label_name, label, count, count / len(df_clean) * 100
+        )
     logger.info("=" * 60)
     logger.info("Pipeline başarıyla tamamlandı! ✅")
     logger.info("=" * 60)

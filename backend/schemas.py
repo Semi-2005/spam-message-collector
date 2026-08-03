@@ -44,12 +44,8 @@ class ClassifyRequest(BaseModel):
     model_config = {
         "json_schema_extra": {
             "examples": [
-                {
-                    "text": "WINNER!! You've won $1,000! Call 09061234567 NOW!"
-                },
-                {
-                    "text": "Hi Mom, I'll be home for dinner tonight."
-                },
+                {"text": "WINNER!! You've won $1,000! Call 09061234567 NOW!"},
+                {"text": "Hi Mom, I'll be home for dinner tonight."},
             ]
         }
     }

@@ -102,15 +102,15 @@ def _get_candidate_models() -> dict[str, Any]:
         "MultinomialNB": {
             "estimator": MultinomialNB(alpha=0.1),
             "description": "Multinomial Naive Bayes — Metin sınıflandırma "
-                           "için temel ve hızlı bir olasılıksal model. "
-                           "alpha=0.1 Laplace smoothing ile.",
+            "için temel ve hızlı bir olasılıksal model. "
+            "alpha=0.1 Laplace smoothing ile.",
             "hyperparams": {"alpha": 0.1, "fit_prior": True},
         },
         "ComplementNB": {
             "estimator": ComplementNB(alpha=0.5),
             "description": "Complement Naive Bayes — İmbalanced veri setleri "
-                           "için optimize edilmiş NB varyantı. Spam/ham "
-                           "dengesizliğine karşı dayanıklı.",
+            "için optimize edilmiş NB varyantı. Spam/ham "
+            "dengesizliğine karşı dayanıklı.",
             "hyperparams": {"alpha": 0.5, "norm": False},
         },
         "LinearSVC": {
@@ -121,9 +121,9 @@ def _get_candidate_models() -> dict[str, Any]:
                 dual="auto",
             ),
             "description": "Linear Support Vector Classifier — Yüksek boyutlu "
-                           "TF-IDF uzayında güçlü ayrım yeteneği. "
-                           "class_weight='balanced' ile sınıf dengesizliği "
-                           "telafi edilir.",
+            "TF-IDF uzayında güçlü ayrım yeteneği. "
+            "class_weight='balanced' ile sınıf dengesizliği "
+            "telafi edilir.",
             "hyperparams": {
                 "C": 1.0,
                 "max_iter": 10000,
@@ -140,7 +140,7 @@ def _get_candidate_models() -> dict[str, Any]:
                 n_jobs=-1,
             ),
             "description": "Random Forest — Ensemble tabanlı, overfitting'e "
-                           "karşı dirençli model. Paralel eğitim ile hızlı.",
+            "karşı dirençli model. Paralel eğitim ile hızlı.",
             "hyperparams": {
                 "n_estimators": 200,
                 "max_depth": None,
@@ -157,8 +157,8 @@ def _get_candidate_models() -> dict[str, Any]:
                 random_state=42,
             ),
             "description": "Logistic Regression — Basit, yorumlanabilir ve "
-                           "güçlü bir linear model. Baseline olarak "
-                           "kullanılır. Olasılık çıktısı üretir.",
+            "güçlü bir linear model. Baseline olarak "
+            "kullanılır. Olasılık çıktısı üretir.",
             "hyperparams": {
                 "C": 1.0,
                 "max_iter": 1000,
@@ -286,7 +286,8 @@ class SpamModelTrainer:
         y = self._df["label"]
 
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y,
+            X,
+            y,
             test_size=self.test_size,
             random_state=self.random_state,
             stratify=y,
@@ -296,9 +297,11 @@ class SpamModelTrainer:
             "Train/Test split tamamlandı — "
             "Train: %d (%d ham, %d spam) | Test: %d (%d ham, %d spam)",
             len(X_train),
-            (y_train == 0).sum(), (y_train == 1).sum(),
+            (y_train == 0).sum(),
+            (y_train == 1).sum(),
             len(X_test),
-            (y_test == 0).sum(), (y_test == 1).sum(),
+            (y_test == 0).sum(),
+            (y_test == 1).sum(),
         )
 
         return X_train, X_test, y_train, y_test
@@ -335,8 +338,7 @@ class SpamModelTrainer:
         )
 
         logger.info(
-            "TF-IDF Vectorizer yapılandırıldı — "
-            "ngram=(1,2), max_features=5000, sublinear_tf=True"
+            "TF-IDF Vectorizer yapılandırıldı — ngram=(1,2), max_features=5000, sublinear_tf=True"
         )
 
         return self._vectorizer
@@ -390,18 +392,23 @@ class SpamModelTrainer:
             # Pipeline oluştur: TF-IDF → Model
             # Her model kendi vectorizer instance'ına sahip olacak
             # böylece cross-validation sırasında data leakage önlenir.
-            pipeline = Pipeline([
-                ("tfidf", TfidfVectorizer(
-                    ngram_range=(1, 2),
-                    max_features=5000,
-                    sublinear_tf=True,
-                    min_df=2,
-                    max_df=0.95,
-                    strip_accents="unicode",
-                    dtype=np.float64,
-                )),
-                ("clf", config["estimator"]),
-            ])
+            pipeline = Pipeline(
+                [
+                    (
+                        "tfidf",
+                        TfidfVectorizer(
+                            ngram_range=(1, 2),
+                            max_features=5000,
+                            sublinear_tf=True,
+                            min_df=2,
+                            max_df=0.95,
+                            strip_accents="unicode",
+                            dtype=np.float64,
+                        ),
+                    ),
+                    ("clf", config["estimator"]),
+                ]
+            )
 
             # --- Cross-Validation (eğitim seti üzerinde) ---
             t_start = time.perf_counter()
@@ -429,7 +436,8 @@ class SpamModelTrainer:
             test_f1 = f1_score(y_test, y_pred, zero_division=0)
             cm = confusion_matrix(y_test, y_pred)
             report = classification_report(
-                y_test, y_pred,
+                y_test,
+                y_pred,
                 target_names=["Ham (0)", "Spam (1)"],
                 output_dict=True,
             )
@@ -453,7 +461,8 @@ class SpamModelTrainer:
             # Sonuçları logla
             logger.info(
                 "   CV F1:    %.4f (±%.4f)",
-                cv_scores.mean(), cv_scores.std(),
+                cv_scores.mean(),
+                cv_scores.std(),
             )
             logger.info("   Test Accuracy:  %.4f", test_accuracy)
             logger.info("   Test Precision: %.4f", test_precision)
@@ -461,7 +470,10 @@ class SpamModelTrainer:
             logger.info("   Test F1:        %.4f", test_f1)
             logger.info(
                 "   Confusion Matrix: TN=%d FP=%d FN=%d TP=%d",
-                cm[0][0], cm[0][1], cm[1][0], cm[1][1],
+                cm[0][0],
+                cm[0][1],
+                cm[1][0],
+                cm[1][1],
             )
             logger.info("   Eğitim süresi:  %.3f sn", train_time)
 
@@ -481,22 +493,22 @@ class SpamModelTrainer:
 
         rows = []
         for name, metrics in self._results.items():
-            rows.append({
-                "Model": name,
-                "CV F1 (mean)": f"{metrics['cv_f1_mean']:.4f}",
-                "CV F1 (std)": f"±{metrics['cv_f1_std']:.4f}",
-                "Test Accuracy": f"{metrics['test_accuracy']:.4f}",
-                "Test Precision": f"{metrics['test_precision']:.4f}",
-                "Test Recall": f"{metrics['test_recall']:.4f}",
-                "Test F1": f"{metrics['test_f1']:.4f}",
-                "Süre (sn)": f"{metrics['train_time_seconds']:.3f}",
-            })
+            rows.append(
+                {
+                    "Model": name,
+                    "CV F1 (mean)": f"{metrics['cv_f1_mean']:.4f}",
+                    "CV F1 (std)": f"±{metrics['cv_f1_std']:.4f}",
+                    "Test Accuracy": f"{metrics['test_accuracy']:.4f}",
+                    "Test Precision": f"{metrics['test_precision']:.4f}",
+                    "Test Recall": f"{metrics['test_recall']:.4f}",
+                    "Test F1": f"{metrics['test_f1']:.4f}",
+                    "Süre (sn)": f"{metrics['train_time_seconds']:.3f}",
+                }
+            )
 
         df_comparison = pd.DataFrame(rows)
         # Test F1'e göre sırala
-        df_comparison = df_comparison.sort_values(
-            "Test F1", ascending=False
-        ).reset_index(drop=True)
+        df_comparison = df_comparison.sort_values("Test F1", ascending=False).reset_index(drop=True)
 
         logger.info("\n" + "=" * 65)
         logger.info("MODEL KARŞILAŞTIRMA TABLOSU (Test F1'e göre sıralı)")
@@ -567,9 +579,7 @@ class SpamModelTrainer:
         pipeline_path = self.model_dir / "best_model_pipeline.joblib"
         joblib.dump(pipeline, pipeline_path, compress=3)
         pipeline_size_mb = pipeline_path.stat().st_size / (1024 * 1024)
-        logger.info(
-            "Pipeline kaydedildi: %s (%.2f MB)", pipeline_path, pipeline_size_mb
-        )
+        logger.info("Pipeline kaydedildi: %s (%.2f MB)", pipeline_path, pipeline_size_mb)
 
         # Metadata JSON oluştur
         metadata = {

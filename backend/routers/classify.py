@@ -100,7 +100,7 @@ async def classify_message(request: ClassifyRequest) -> ClassifyResponse:
                 "error": "Sınıflandırma sırasında bir hata oluştu.",
                 "message": str(e),
             },
-        )
+        ) from e
 
 
 @router.post(
@@ -172,4 +172,4 @@ async def classify_batch(request: BatchClassifyRequest) -> BatchClassifyResponse
                 "error": "Toplu sınıflandırma sırasında bir hata oluştu.",
                 "message": str(e),
             },
-        )
+        ) from e

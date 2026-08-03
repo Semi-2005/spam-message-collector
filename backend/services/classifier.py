@@ -96,9 +96,7 @@ class SpamClassifierService:
         settings = get_settings()
 
         self._model_path = Path(model_path) if model_path else settings.MODEL_PATH
-        self._metadata_path = (
-            Path(metadata_path) if metadata_path else settings.MODEL_METADATA_PATH
-        )
+        self._metadata_path = Path(metadata_path) if metadata_path else settings.MODEL_METADATA_PATH
         self._spam_threshold = settings.SPAM_THRESHOLD
 
         self._pipeline: Any | None = None
@@ -223,13 +221,10 @@ class SpamClassifierService:
                 "confidence_level": "Düşük",
             }
 
-        # Adım 2: Tahmin
-        prediction = self._pipeline.predict([cleaned_text])[0]
-
-        # Adım 3: Olasılık hesaplama
+        # Adım 2: Olasılık hesaplama
         spam_probability = self._compute_probability(cleaned_text)
 
-        # Adım 4: Eşik değerine göre nihai karar
+        # Adım 3: Eşik değerine göre nihai karar
         is_spam = spam_probability >= self._spam_threshold
         label = "spam" if is_spam else "ham"
 

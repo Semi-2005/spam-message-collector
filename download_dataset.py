@@ -1,10 +1,9 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
+
 import kagglehub
 
-dataset_path = Path(
-    kagglehub.dataset_download("uciml/sms-spam-collection-dataset")
-)
+dataset_path = Path(kagglehub.dataset_download("uciml/sms-spam-collection-dataset"))
 
 destination = Path("data/raw")
 destination.mkdir(parents=True, exist_ok=True)
