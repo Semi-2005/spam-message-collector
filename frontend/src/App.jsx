@@ -1,28 +1,61 @@
 // src/App.jsx
 /**
- * App — Ana Uygulama Bileşeni
- * =============================
+ * App — Ana Uygulama Bileşeni (Gün 6 — Geliştirilmiş)
+ * ======================================================
  * Spam Message Classifier frontend uygulamasının giriş noktası.
  *
- * Sorumluluklar:
- *   - Global state yönetimi (result, loading, error, health)
- *   - API çağrı orkestratoru
- *   - Bileşen düzeni (layout)
- *   - Başlangıçta health check ile API durumu kontrolü
+ * Gün 6 İyileştirmeleri:
+ *   - Toast notification sistemi (inline alert yerine)
+ *   - LoadingSkeleton (API yanıtı beklerken)
+ *   - HistoryPanel (localStorage ile kalıcı analiz geçmişi)
+ *   - Gelişmiş state yönetimi
  */
 
 import { useState, useEffect, useCallback } from "react";
 import MessageForm from "./components/MessageForm";
 import ResultCard from "./components/ResultCard";
+import Toast from "./components/Toast";
+import LoadingSkeleton from "./components/LoadingSkeleton";
+import HistoryPanel from "./components/HistoryPanel";
+import useToast from "./hooks/useToast";
 import { classifyMessage, checkHealth } from "./services/api";
 
+// ---------------------------------------------------------------------------
+// LocalStorage Helpers
+// ---------------------------------------------------------------------------
+const HISTORY_KEY = "spam_detector_history";
+const MAX_HISTORY = 20;
+
+function loadHistory() {
+  try {
+    const saved = localStorage.getItem(HISTORY_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(history) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+  } catch {
+    // localStorage dolu veya erişilemez — sessizce devam et
+  }
+}
+
+// ---------------------------------------------------------------------------
+// App Component
+// ---------------------------------------------------------------------------
 export default function App() {
   // State
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [health, setHealth] = useState(null);
   const [isHealthChecking, setIsHealthChecking] = useState(true);
+  const [history, setHistory] = useState(loadHistory);
+
+  // Toast hook
+  const { toasts, addToast, removeToast } = useToast();
 
   // Startup health check
   useEffect(() => {
@@ -30,35 +63,76 @@ export default function App() {
       try {
         const data = await checkHealth();
         setHealth(data);
+        if (data.status === "healthy") {
+          addToast(
+            `API bağlantısı kuruldu — Model: ${data.model_name || "LinearSVC"}, Doğruluk: %${(data.model_accuracy * 100).toFixed(1)}`,
+            "success"
+          );
+        }
       } catch {
         setHealth(null);
+        addToast(
+          "Backend bağlantısı kurulamadı. Lütfen API sunucusunu başlatın.",
+          "warning",
+          6000
+        );
       } finally {
         setIsHealthChecking(false);
       }
     }
     fetchHealth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Mesaj sınıflandırma handler
   const handleClassify = useCallback(async (text) => {
     setIsLoading(true);
-    setError(null);
     setResult(null);
 
     try {
       const data = await classifyMessage(text);
-      setResult(data);
+
+      // Timestamp ekle
+      const resultWithTime = { ...data, timestamp: Date.now() };
+      setResult(resultWithTime);
+
+      // Geçmişe ekle (en yenisi başta)
+      setHistory((prev) => {
+        const updated = [resultWithTime, ...prev].slice(0, MAX_HISTORY);
+        saveHistory(updated);
+        return updated;
+      });
+
+      // Başarı toast
+      addToast(
+        data.is_spam
+          ? `🛡️ Spam tespit edildi — %${(data.spam_probability * 100).toFixed(1)} olasılık`
+          : `✅ Güvenli mesaj — %${((1 - data.spam_probability) * 100).toFixed(1)} güvenilirlik`,
+        data.is_spam ? "warning" : "success"
+      );
     } catch (err) {
-      setError(err.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+      addToast(
+        err.message || "Bir hata oluştu. Lütfen tekrar deneyin.",
+        "error",
+        5000
+      );
     } finally {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sonucu temizle
   const handleClear = useCallback(() => {
     setResult(null);
-    setError(null);
+  }, []);
+
+  // Geçmişi temizle
+  const handleClearHistory = useCallback(() => {
+    setHistory([]);
+    localStorage.removeItem(HISTORY_KEY);
+    addToast("Analiz geçmişi temizlendi.", "info");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // API durumu
@@ -73,6 +147,9 @@ export default function App() {
         <div className="bg-orb bg-orb-2" />
         <div className="bg-orb bg-orb-3" />
       </div>
+
+      {/* Toast Notifications */}
+      <Toast toasts={toasts} onRemove={removeToast} />
 
       <div className="container">
         {/* Header */}
@@ -132,16 +209,7 @@ export default function App() {
           {/* API Çevrimdışı Uyarısı */}
           {!isHealthChecking && !isApiOnline && (
             <div className="alert alert-warning">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -161,36 +229,19 @@ export default function App() {
             <MessageForm onSubmit={handleClassify} isLoading={isLoading} />
           </section>
 
-          {/* Hata Gösterimi */}
-          {error && (
-            <div className="alert alert-error">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-              <span>{error}</span>
-              <button
-                type="button"
-                className="alert-dismiss"
-                onClick={() => setError(null)}
-              >
-                ✕
-              </button>
-            </div>
-          )}
+          {/* Loading Skeleton */}
+          {isLoading && <LoadingSkeleton />}
 
           {/* Sonuç */}
-          {result && <ResultCard result={result} onClear={handleClear} />}
+          {!isLoading && result && (
+            <ResultCard result={result} onClear={handleClear} />
+          )}
+
+          {/* Analiz Geçmişi */}
+          <HistoryPanel
+            history={history}
+            onClearHistory={handleClearHistory}
+          />
         </main>
 
         {/* Footer */}
