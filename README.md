@@ -24,10 +24,8 @@
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#-usage)
-  - [Running the API](#running-the-api)
+  - [Running the Full Application](#running-the-full-application)
   - [API Inference Example](#api-inference-example)
-- [Roadmap](#-roadmap)
-- [License](#-license)
 
 ---
 
@@ -87,36 +85,52 @@ spam-message-collector/
 
 ## 🛠 Getting Started
 
-Follow these steps to set up the project locally.
+Follow these steps to set up the project locally from scratch.
 
 ### Prerequisites
 
-*   Python 3.10 or higher
-*   Node.js (v18+) and npm (for the frontend)
+*   **Python 3.10+** ([python.org](https://www.python.org/downloads/))
+*   **Node.js v18+** and **npm** ([nodejs.org](https://nodejs.org/))
+*   **Git** ([git-scm.com](https://git-scm.com/))
 
 ### Installation
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/spam-message-collector.git
+    git clone https://github.com/Semi-2005/spam-message-collector.git
     cd spam-message-collector
     ```
 
-2.  **Set up a Python virtual environment:**
+2.  **Create and activate a Python virtual environment:**
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    python3 -m venv .venv
+    source .venv/bin/activate        # macOS / Linux
+    # .venv\Scripts\activate         # Windows
     ```
 
-3.  **Install backend dependencies:**
+3.  **Install backend (Python) dependencies:**
     ```bash
     pip install --upgrade pip
     pip install -r requirements.txt
     ```
+    > **Not:** NLTK veri dosyaları (stopwords, wordnet, punkt) ilk çalıştırmada otomatik indirilir. İnternet bağlantısı gereklidir.
 
-4.  **Download and prepare the dataset:**
+4.  **Download the dataset:**
     ```bash
     python download_dataset.py
+    ```
+
+5.  **Train the ML model:**
+    ```bash
+    python -m models.train_model
+    ```
+    > Bu adım `models/artifacts/` altına eğitilmiş model (`best_model_pipeline.joblib`) ve metadata dosyasını oluşturur. Eğitim ~30 saniye sürer.
+
+6.  **Install frontend (Node.js) dependencies:**
+    ```bash
+    cd frontend
+    npm install
+    cd ..
     ```
 
 ---
@@ -130,7 +144,7 @@ The application requires **two terminals** — one for the backend API and one f
 **Terminal 1 — Backend (FastAPI):**
 
 ```bash
-cd /path/to/spam-message-collector
+cd spam-message-collector
 source .venv/bin/activate
 uvicorn backend.main:app --reload --port 8000
 ```
@@ -140,14 +154,13 @@ uvicorn backend.main:app --reload --port 8000
 **Terminal 2 — Frontend (React):**
 
 ```bash
-cd /path/to/spam-message-collector/frontend
-npm install   # sadece ilk seferde
+cd spam-message-collector/frontend
 npm run dev
 ```
 
 > Frontend `http://localhost:5173` adresinde açılacaktır.
 
-Tarayıcıda `http://localhost:5173` adresini açarak uygulamayı kullanabilirsiniz.
+**Tarayıcıda** `http://localhost:5173` adresini açarak uygulamayı kullanabilirsiniz.
 
 ### API Inference Example
 
@@ -177,7 +190,6 @@ curl -X POST "http://127.0.0.1:8000/api/v1/classify" \
 - [ ] Implement advanced Deep Learning models (e.g., LSTM, BERT).
 - [ ] Add extensive unit and integration tests.
 - [ ] **Dockerization:** Containerize the React frontend and FastAPI backend using Docker and `docker-compose` for seamless, independent scaling and deployment.
-- [ ] Enhance UI/UX with real-time feedback animations and a history dashboard.
 - [ ] Implement CI/CD pipelines with GitHub Actions.
 
 ---
