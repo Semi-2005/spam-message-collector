@@ -1,0 +1,28 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    # Her Pazartesi gece saat 03:00'da otomatik güvenlik taraması
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  npm-audit:
+    name: 🔒 Frontend npm Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run npm Audit
+        working-directory: ./frontend
+        run: npm audit --audit-level=high || true
